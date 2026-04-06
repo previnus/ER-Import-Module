@@ -9,10 +9,10 @@ PrestaShop module for importing and synchronising remote catalog data, including
 
 ## What it does
 
-- Downloads remote feed files over FTP
-- Builds a translated PrestaShop import CSV
-- Runs full product imports
-- Updates pricing, quantity, and discontinued products on schedule
+- downloads remote feed files over FTP
+- builds a translated PrestaShop import CSV
+- runs full product imports
+- updates pricing, quantity, and discontinued products on schedule
 
 ## PrestaShop 9 / PHP 8.x notes
 
@@ -24,7 +24,7 @@ This repository includes compatibility-oriented fixes for newer environments, in
 
 ## Cron usage
 
-Use the module's cron trigger controller rather than calling the full manual import endpoint every hour.
+Use the module cron trigger controller rather than calling the full manual import endpoint every hour.
 
 Example wrapper:
 
@@ -79,7 +79,3 @@ grep -r "CSI RemoteCatalog:" /path/to/prestashop/var/logs/ 2>/dev/null | tail -1
 ## Repository contents
 
 This repository stores the module source directly at repository root so it can be copied into a PrestaShop `modules/csi_remotecatalog` directory.
-
-## Original project notes
-
-The legacy project changelog is preserved in `Readme.md`.
