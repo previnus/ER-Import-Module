@@ -1,0 +1,26 @@
+{
+    "name": "catalogsolutions/csi_remotecatalog",
+    "description": "Keep shop up to date with remote data source(s).",
+    "type": "prestashop-module",
+    "authors": [
+        {
+            "name": "Symeon Quimby",
+            "email": "symeon@catalogsolutions.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"CSI\\": "src/"}
+    },
+    "require": {
+        "phpseclib/phpseclib": "~2.0",
+        "google/apiclient": "^2.10"
+    },
+    "scripts": {
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+    },
+    "extra": {
+        "google/apiclient-services": [
+            "Sheets"
+        ]
+    }
+}

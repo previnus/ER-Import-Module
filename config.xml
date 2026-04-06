@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>csi_remotecatalog</name>
+    <displayName><![CDATA[Remote Catalog Data]]></displayName>
+    <version><![CDATA[1.2.6]]></version>
+    <description><![CDATA[Keep shop up to date with remote data source. Currently supports Educators Resource and Essendant.]]></description>
+    <author><![CDATA[Catalog Solutions]]></author>
+    <tab><![CDATA[quick_bulk_update]]></tab>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+</module>
