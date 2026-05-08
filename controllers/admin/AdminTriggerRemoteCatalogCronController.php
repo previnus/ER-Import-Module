@@ -4,7 +4,9 @@ class AdminTriggerRemoteCatalogCronController extends ModuleAdminController
 {
     public function __construct()
     {
-        if (Tools::getValue('cron') != 'Ds6qF896jyLV0') {
+        $storedToken = Configuration::get('CSI_REMOTECATALOG_CRON_TOKEN');
+        $providedToken = Tools::getValue('cron');
+        if (!$storedToken || !$providedToken || !hash_equals($storedToken, $providedToken)) {
             die('Invalid token');
         }
 

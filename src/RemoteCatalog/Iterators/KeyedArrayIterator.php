@@ -15,7 +15,11 @@ class KeyedArrayIterator extends \IteratorIterator
 
     public function current()
     {
-        return array_combine($this->keys, parent::current());
+        $values = parent::current();
+        if (!is_array($values) || count($this->keys) !== count($values)) {
+            return false;
+        }
+        return array_combine($this->keys, $values);
     }
 
     public function getKeys()

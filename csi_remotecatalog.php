@@ -33,11 +33,33 @@ class Csi_RemoteCatalog extends Module
         ) {
             return false;
         }
+        if (!Configuration::get('CSI_REMOTECATALOG_CRON_TOKEN')) {
+            Configuration::updateValue('CSI_REMOTECATALOG_CRON_TOKEN', bin2hex(random_bytes(16)));
+        }
         return true;
     }
 
     public function uninstall()
     {
+        $tabNames = ['AdminTriggerCsiImport', 'AdminTriggerRemoteCatalogCron'];
+        foreach ($tabNames as $className) {
+            $tabId = (int)Tab::getIdFromClassName($className);
+            if ($tabId) {
+                $tab = new Tab($tabId);
+                $tab->delete();
+            }
+        }
+        $configKeys = [
+            'CSI_REMOTECATALOG_ENABLE', 'CSI_REMOTECATALOG_TRUNCATE',
+            'CSI_REMOTECATALOG_ER_ACTIVE', 'CSI_REMOTECATALOG_ERFTP',
+            'CSI_REMOTECATALOG_ERFTPU', 'CSI_REMOTECATALOG_ERFTPP',
+            'CSI_REMOTECATALOG_ERPRICEF', 'CSI_REMOTECATALOG_ER_HIDE_STOCK',
+            'CSI_REMOTECATALOG_EXTRAWEIGHT', 'CSI_REMOTECATALOG_EXTRAPERCENT',
+            'CSI_REMOTECATALOG_CRON_TOKEN',
+        ];
+        foreach ($configKeys as $key) {
+            Configuration::deleteByName($key);
+        }
         return parent::uninstall();
     }
 
@@ -60,7 +82,7 @@ class Csi_RemoteCatalog extends Module
 
     public function getContent()
     {
-        $output = null;
+        $output = '';
         if (Tools::isSubmit('submit'.$this->name)) {
             // Process post
             $active = Tools::getValue('CSI_REMOTECATALOG_ENABLE');
@@ -69,20 +91,28 @@ class Csi_RemoteCatalog extends Module
             Configuration::updateValue('CSI_REMOTECATALOG_TRUNCATE', $truncate);
 
             Configuration::updateValue('CSI_REMOTECATALOG_ER_ACTIVE', Tools::getValue('CSI_REMOTECATALOG_ER_ACTIVE'));
+
+            // Only overwrite encrypted credentials if a new non-empty value is submitted
             $erftp = Tools::getValue('CSI_REMOTECATALOG_ERFTP');
-            Configuration::updateValue('CSI_REMOTECATALOG_ERFTP', Crypto::encryptWithPassword($erftp, _COOKIE_KEY_));
+            if (!empty($erftp)) {
+                Configuration::updateValue('CSI_REMOTECATALOG_ERFTP', Crypto::encryptWithPassword($erftp, _COOKIE_KEY_));
+            }
             $erftpu = Tools::getValue('CSI_REMOTECATALOG_ERFTPU');
-            Configuration::updateValue('CSI_REMOTECATALOG_ERFTPU', Crypto::encryptWithPassword($erftpu, _COOKIE_KEY_));
+            if (!empty($erftpu)) {
+                Configuration::updateValue('CSI_REMOTECATALOG_ERFTPU', Crypto::encryptWithPassword($erftpu, _COOKIE_KEY_));
+            }
             $erftpp = Tools::getValue('CSI_REMOTECATALOG_ERFTPP');
-            Configuration::updateValue('CSI_REMOTECATALOG_ERFTPP', Crypto::encryptWithPassword($erftpp, _COOKIE_KEY_));
+            if (!empty($erftpp)) {
+                Configuration::updateValue('CSI_REMOTECATALOG_ERFTPP', Crypto::encryptWithPassword($erftpp, _COOKIE_KEY_));
+            }
+
             $erpricefile = Tools::getValue('CSI_REMOTECATALOG_ERPRICEF');
             Configuration::updateValue('CSI_REMOTECATALOG_ERPRICEF', $erpricefile);
             Configuration::updateValue('CSI_REMOTECATALOG_ER_HIDE_STOCK', Tools::getValue('CSI_REMOTECATALOG_ER_HIDE_STOCK'));
 
-
-            $extraFreight = Tools::getValue('CSI_REMOTECATALOG_EXTRAWEIGHT');
+            $extraFreight = (float)Tools::getValue('CSI_REMOTECATALOG_EXTRAWEIGHT');
             Configuration::updateValue('CSI_REMOTECATALOG_EXTRAWEIGHT', $extraFreight);
-            $extraPercent = Tools::getValue('CSI_REMOTECATALOG_EXTRAPERCENT');
+            $extraPercent = (float)Tools::getValue('CSI_REMOTECATALOG_EXTRAPERCENT');
             Configuration::updateValue('CSI_REMOTECATALOG_EXTRAPERCENT', $extraPercent);
 
             $output .= $this->displayConfirmation($this->l('Settings updated'));
@@ -302,7 +332,7 @@ class Csi_RemoteCatalog extends Module
             return;
         }
         \PrestaShopLogger::addLog('CSI RemoteCatalog: Cron job hook triggered', 1);
-        require_once('vendor/autoload.php');
+        require_once(__DIR__ . '/vendor/autoload.php');
 
         // Setup an employee context so the product import doesn't randomly fail
         $this->context->employee = new Employee(1);

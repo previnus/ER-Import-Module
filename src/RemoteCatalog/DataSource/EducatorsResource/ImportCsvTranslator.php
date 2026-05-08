@@ -66,8 +66,9 @@ class ImportCsvTranslator implements TranslatorInterface
     private function buildShortDescription($data)
     {
         if (mb_strlen($data) >= 800) {
-            $pos = mb_strrpos($data, '.', 800 - mb_strlen($data));
-            $data = mb_substr($data, 0, $pos + 1);
+            $truncated = mb_substr($data, 0, 800);
+            $pos = mb_strrpos($truncated, '.');
+            $data = ($pos !== false) ? mb_substr($truncated, 0, $pos + 1) : $truncated;
         }
         return $data;
     }
@@ -87,7 +88,7 @@ class ImportCsvTranslator implements TranslatorInterface
         if (count($bullets)) {
             $description .= '<br/><br/><ul>';
             foreach ($bullets as $bullet) {
-                $description .= "<li>{$bullet}</li>";
+                $description .= '<li>' . htmlspecialchars($bullet, ENT_QUOTES, 'UTF-8') . '</li>';
             }
             $description .= '</ul>';
         }

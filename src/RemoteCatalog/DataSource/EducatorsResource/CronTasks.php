@@ -139,7 +139,7 @@ class CronTasks implements CronTasksInterface
             $product_id = (array_key_exists($reference, $map) ? $map[$reference] : null);
             if ($product_id) {
                 $product = new \Product($product_id);
-                if (\Validate::isLoadedObject($product) && $product->active !== "0") {
+                if (\Validate::isLoadedObject($product) && (int)$product->active !== 0) {
                     $product->active = 0;
                     $product->save();
                 }
