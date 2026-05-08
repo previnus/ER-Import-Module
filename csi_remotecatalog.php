@@ -231,7 +231,7 @@ class Csi_RemoteCatalog extends Module
                     'is_name' => true,
                 ),
                 array(
-                    'type' => 'text',
+                    'type' => 'password',
                     'label' => $this->l('Pass'),
                     'name' => 'CSI_REMOTECATALOG_ERFTPP',
                     'is_name' => true,
@@ -311,14 +311,18 @@ class Csi_RemoteCatalog extends Module
         $helper->fields_value['CSI_REMOTECATALOG_EXTRAWEIGHT'] = Configuration::get('CSI_REMOTECATALOG_EXTRAWEIGHT');
         $helper->fields_value['CSI_REMOTECATALOG_EXTRAPERCENT'] = Configuration::get('CSI_REMOTECATALOG_EXTRAPERCENT');
 
-        if ($erftp = Configuration::get('CSI_REMOTECATALOG_ERFTP')) {
-            $helper->fields_value['CSI_REMOTECATALOG_ERFTP'] = Crypto::decryptWithPassword($erftp, _COOKIE_KEY_);
-        }
-        if($erftpu = Configuration::get('CSI_REMOTECATALOG_ERFTPU')) {
-            $helper->fields_value['CSI_REMOTECATALOG_ERFTPU'] = Crypto::decryptWithPassword($erftpu, _COOKIE_KEY_);
-        }
-        if ($erftpp = Configuration::get('CSI_REMOTECATALOG_ERFTPP')) {
-            $helper->fields_value['CSI_REMOTECATALOG_ERFTPP'] = Crypto::decryptWithPassword($erftpp, _COOKIE_KEY_);
+        try {
+            if ($erftp = Configuration::get('CSI_REMOTECATALOG_ERFTP')) {
+                $helper->fields_value['CSI_REMOTECATALOG_ERFTP'] = Crypto::decryptWithPassword($erftp, _COOKIE_KEY_);
+            }
+            if ($erftpu = Configuration::get('CSI_REMOTECATALOG_ERFTPU')) {
+                $helper->fields_value['CSI_REMOTECATALOG_ERFTPU'] = Crypto::decryptWithPassword($erftpu, _COOKIE_KEY_);
+            }
+            if ($erftpp = Configuration::get('CSI_REMOTECATALOG_ERFTPP')) {
+                $helper->fields_value['CSI_REMOTECATALOG_ERFTPP'] = Crypto::decryptWithPassword($erftpp, _COOKIE_KEY_);
+            }
+        } catch (\Exception $e) {
+            $output .= $this->displayWarning($this->l('FTP credentials could not be decrypted. Please re-enter and save them.'));
         }
   
         return $helper->generateForm($fields_form);
