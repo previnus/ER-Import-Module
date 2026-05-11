@@ -15,7 +15,7 @@ class Csi_RemoteCatalog extends Module
         $this->tab = 'quick_bulk_update';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
-        $this->version = '1.2.6';
+        $this->version = '1.2.7';
         $this->author = 'Symeon Quimby';
 
         parent::__construct();
@@ -151,7 +151,7 @@ class Csi_RemoteCatalog extends Module
                         )
                     )
                 ),
-                array( //TODO: Maybe this configuration item needs moving to a datasource specific setting?
+                array(
                     'type' => 'switch',
                     'label' => $this->l('Truncate Products on Import?'),
                     'name' => 'CSI_REMOTECATALOG_TRUNCATE',
@@ -286,8 +286,8 @@ class Csi_RemoteCatalog extends Module
 
         // Title and toolbar
         $helper->title = $this->displayName;
-        $helper->show_toolbar = true;        // false -> remove toolbar
-        $helper->toolbar_scroll = true;      // yes - > Toolbar is always visible on the top of the screen.
+        $helper->show_toolbar = true;
+        $helper->toolbar_scroll = true;
         $helper->submit_action = 'submit'.$this->name;
         $helper->toolbar_btn = array(
             'save' =>
@@ -331,8 +331,7 @@ class Csi_RemoteCatalog extends Module
 
     public function hookActionCronJob()
     {
-        // TODO: Adapt for Multiple Data Sources.
-        if(!Configuration::get('CSI_REMOTECATALOG_ENABLE')) {
+        if (!Configuration::get('CSI_REMOTECATALOG_ENABLE')) {
             return;
         }
         \PrestaShopLogger::addLog('CSI RemoteCatalog: Cron job hook triggered', 1);

@@ -2,7 +2,7 @@
 <module>
     <name>csi_remotecatalog</name>
     <displayName><![CDATA[Remote Catalog Data]]></displayName>
-    <version><![CDATA[1.2.6]]></version>
+    <version><![CDATA[1.2.7]]></version>
     <description><![CDATA[Keep shop up to date with remote data source. Currently supports Educators Resource and Essendant.]]></description>
     <author><![CDATA[Symeon Quimby]]></author>
     <tab><![CDATA[quick_bulk_update]]></tab>

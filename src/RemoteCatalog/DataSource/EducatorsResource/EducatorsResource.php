@@ -21,9 +21,8 @@ class EducatorsResource extends DataSource
 
     public function __construct()
     {
-        // ER Has changed the location of the pricing file at least once
-        // And it seems it might be different for each person who uses
-        // Adding ability to override the price file location.
+        // Allow the pricing file path to be overridden from module settings,
+        // as ER has changed its location between accounts and over time.
         if (\Configuration::get('CSI_REMOTECATALOG_ERPRICEF')) {
             $this->sources['pricing']['remote'] = \Configuration::get('CSI_REMOTECATALOG_ERPRICEF');
         }
@@ -31,7 +30,7 @@ class EducatorsResource extends DataSource
 
     public function getProduct($key)
     {
-        // TODO: Implement getProduct() method.
+        // Not used at the EducatorsResource level; lookups are handled per-dependent source.
     }
 
     public function getProducts()
