@@ -21,9 +21,8 @@ class EducatorsResource extends DataSource
 
     public function __construct()
     {
-        // ER Has changed the location of the pricing file at least once
-        // And it seems it might be different for each person who uses
-        // Adding ability to override the price file location.
+        // Allow the pricing file path to be overridden from module settings,
+        // as ER has changed its location between accounts and over time.
         if (\Configuration::get('CSI_REMOTECATALOG_ERPRICEF')) {
             $this->sources['pricing']['remote'] = \Configuration::get('CSI_REMOTECATALOG_ERPRICEF');
         }
@@ -31,7 +30,7 @@ class EducatorsResource extends DataSource
 
     public function getProduct($key)
     {
-        // TODO: Implement getProduct() method.
+        // Not used at the EducatorsResource level; lookups are handled per-dependent source.
     }
 
     public function getProducts()
@@ -53,13 +52,22 @@ class EducatorsResource extends DataSource
 
     public function fetchSources()
     {
-        $host = Crypto::decryptWithPassword(\Configuration::get('CSI_REMOTECATALOG_ERFTP'), _COOKIE_KEY_);
-        $user = Crypto::decryptWithPassword(\Configuration::get('CSI_REMOTECATALOG_ERFTPU'), _COOKIE_KEY_);
-        $pass = Crypto::decryptWithPassword(\Configuration::get('CSI_REMOTECATALOG_ERFTPP'), _COOKIE_KEY_);
+        try {
+            $host = Crypto::decryptWithPassword(\Configuration::get('CSI_REMOTECATALOG_ERFTP'), _COOKIE_KEY_);
+            $user = Crypto::decryptWithPassword(\Configuration::get('CSI_REMOTECATALOG_ERFTPU'), _COOKIE_KEY_);
+            $pass = Crypto::decryptWithPassword(\Configuration::get('CSI_REMOTECATALOG_ERFTPP'), _COOKIE_KEY_);
+        } catch (\Exception $e) {
+            \PrestaShopLogger::addLog('CSI RemoteCatalog: Failed to decrypt FTP credentials — re-save module settings.', 3);
+            return $this;
+        }
 
         \PrestaShopLogger::addLog('CSI RemoteCatalog: Starting FTP source download', 1);
-        $ftp = ftp_connect($host);
-        if ($ftp && ftp_login($ftp, $user,$pass)) {
+        $ftp = ftp_ssl_connect($host);
+        if (!$ftp) {
+            \PrestaShopLogger::addLog('CSI RemoteCatalog: FTP SSL connect failed, falling back to plain FTP', 2);
+            $ftp = ftp_connect($host);
+        }
+        if ($ftp && ftp_login($ftp, $user, $pass)) {
             ftp_pasv($ftp, true);
             foreach ($this->sources as $key => $source) {
                 \PrestaShopLogger::addLog(sprintf('CSI RemoteCatalog: Downloading source "%s" from %s', $key, $source['remote']), 1);
@@ -71,8 +79,12 @@ class EducatorsResource extends DataSource
                     \PrestaShopLogger::addLog(sprintf('CSI RemoteCatalog: Failed downloading source "%s" from %s', $key, $source['remote']), 2);
                 }
             }
+            ftp_close($ftp);
             \PrestaShopLogger::addLog('CSI RemoteCatalog: FTP source download complete', 1);
         } else {
+            if ($ftp) {
+                ftp_close($ftp);
+            }
             \PrestaShopLogger::addLog('CSI RemoteCatalog: FTP login failed', 3);
         }
 

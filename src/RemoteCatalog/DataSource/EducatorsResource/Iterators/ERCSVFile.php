@@ -11,8 +11,10 @@ class ERCSVFile extends CSVFile
     public function current()
     {
         $data = parent::current();
+        // ER catalog CSVs are inconsistent: some use 'Part ID', others 'Part Id'
+        $partId = $data['Part ID'] ?? $data['Part Id'] ?? null;
         foreach ($this->dependents as $source) {
-            $data = array_merge($data, $source->getProduct($data['Part ID']));
+            $data = array_merge($data, $source->getProduct($partId));
         }
         return $data;
     }
